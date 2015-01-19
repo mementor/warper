@@ -58,7 +58,7 @@ func main() {
 }
 
 func root(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Hello, world"))
+	w.Write([]byte("What you want to find here?"))
 }
 
 func getHandler(w http.ResponseWriter, r *http.Request) {
