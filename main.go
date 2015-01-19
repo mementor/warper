@@ -21,8 +21,6 @@ const (
 
 	// someone set us up the bomb !!
 	BASE = int64(len(SYMBOLS))
-
-	PORT = "80"
 )
 
 var config struct {
@@ -46,10 +44,7 @@ func init() {
 func main() {
 	rand.Seed(time.Now().UTC().UnixNano())
 
-	//config.Port = *flag.String("port", "8080", "port number, default: 8080")
-
 	r := mux.NewRouter()
-
 	r.HandleFunc("/", root).Methods("GET")
 	r.HandleFunc("/{filename}", uploadHandler).Methods("PUT")
 	r.HandleFunc("/{filename}", getHandler).Methods("GET")
@@ -59,7 +54,7 @@ func main() {
 		Handler: r,
 	}
 	s.ListenAndServe()
-	fmt.Println("Hello!")
+	fmt.Println("Exit...")
 }
 
 func root(w http.ResponseWriter, r *http.Request) {
@@ -82,12 +77,10 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-
 	defer reader.Close()
 
 	w.Header().Set("Content-Type", contentType)
 	w.Header().Set("Content-Length", strconv.FormatUint(contentLength, 10))
-	//w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", filename))
 	w.Header().Set("Connection", "close")
 
 	if _, err = io.Copy(w, reader); err != nil {
@@ -99,26 +92,21 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 
 func readFile(filename string) (reader io.ReadCloser, contentType string, contentLength uint64, err error) {
 	path := filepath.Join(config.Storedir, filename)
-
 	// content type , content length
 	if reader, err = os.Open(path); err != nil {
 		return
 	}
-
 	var fi os.FileInfo
 	if fi, err = os.Lstat(path); err != nil {
 		return
 	}
-
 	contentLength = uint64(fi.Size())
-
 	contentType = mime.TypeByExtension(filepath.Ext(filename))
 
 	return
 }
 
 func uploadHandler(w http.ResponseWriter, r *http.Request) {
-	//fmt.Printf("%v\n", r)
 	vars := mux.Vars(r)
 	fileext := filepath.Ext(vars["filename"])
 	contentLength := r.ContentLength
@@ -130,11 +118,6 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	var reader io.Reader
 	reader = r.Body
-
-	//fmt.Printf("fileext: %s\n", fileext)
-	//fmt.Printf("contentLength: %d\n", contentLength)
-	//fmt.Printf("contentType: %s\n", contentType)
-	//fmt.Printf("token: %s\n", token)
 
 	w.Header().Set("Content-Type", "text/plain")
 
@@ -151,7 +134,6 @@ func writeFile(token string, fileext string, reader io.Reader, contentType strin
 		fmt.Printf("%s", err)
 		return err
 	}
-
 	defer f.Close()
 
 	if _, err = io.Copy(f, reader); err != nil {
@@ -170,16 +152,4 @@ func Encode(number int64) string {
 		result = Encode(newnumber) + result
 	}
 	return result
-}
-
-func ipAddrFromRemoteAddr(s string) string {
-	return s
-	if PORT != "80" {
-		return s
-	}
-	idx := strings.LastIndex(s, ":")
-	if idx == -1 {
-		return s
-	}
-	return s[:idx]
 }
