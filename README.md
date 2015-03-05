@@ -18,6 +18,8 @@ and then just do something like this:
 
 ##### Docker (advanced way):
 ```
+$ docker build -t warper .
+
 $ docker run -d -p 80:80 --name nginx -v /tmp/nginx:/etc/nginx/conf.d -t nginx
 
 $ sudo cp templates/* /tmp/templates
