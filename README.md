@@ -15,6 +15,8 @@ and then just do something like this:
 
 ```$ warp somefile.png```
 
+
+Docker (advanced way)
 ```
 docker run -d -p 80:80 --name nginx -v /tmp/nginx:/etc/nginx/conf.d -t nginx
 
