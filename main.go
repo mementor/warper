@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/gorilla/mux"
 	"io"
 	"math/rand"
 	"mime"
@@ -12,13 +11,15 @@ import (
 	"path/filepath"
 	"strconv"
 	"time"
+
+	"github.com/gorilla/mux"
 )
 
 const (
-	// characters used for short-urls
+	// SYMBOLS characters used for short-urls
 	SYMBOLS = "0123456789abcdefghijklmnopqrsuvwxyzABCDEFGHIJKLMNOPQRSTUVXYZ"
 
-	// someone set us up the bomb !!
+	// BASE someone set us up the bomb !!
 	BASE = int64(len(SYMBOLS))
 )
 
@@ -70,11 +71,11 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 		if err.Error() == "The specified key does not exist." {
 			http.Error(w, "File not found", 404)
 			return
-		} else {
-			fmt.Printf("%s", err.Error())
-			http.Error(w, "Could not retrieve file.", 500)
-			return
 		}
+
+		fmt.Printf("%s", err.Error())
+		http.Error(w, "Could not retrieve file.", 500)
+		return
 	}
 	defer reader.Close()
 
@@ -110,7 +111,7 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	fileext := filepath.Ext(vars["filename"])
 	contentLength := r.ContentLength
 	contentType := r.Header.Get("Content-Type")
-	token := Encode(10000000 + int64(rand.Intn(1000000000)))
+	token := encode(10000000 + int64(rand.Intn(1000000000)))
 	if contentType == "" {
 		contentType = mime.TypeByExtension(filepath.Ext(vars["filename"]))
 	}
@@ -142,13 +143,13 @@ func writeFile(token string, fileext string, reader io.Reader, contentType strin
 	return nil
 }
 
-func Encode(number int64) string {
+func encode(number int64) string {
 	rest := number % BASE
 	// strings are a bit weird in go...
 	result := string(SYMBOLS[rest])
 	if number-rest != 0 {
 		newnumber := (number - rest) / BASE
-		result = Encode(newnumber) + result
+		result = encode(newnumber) + result
 	}
 	return result
 }
